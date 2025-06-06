@@ -11,7 +11,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { CaretDown, CaretUp, SignOut } from "@phosphor-icons/react";
 import { useAuthentication } from "../contexts/authentication";
-import { getUserById } from "../api";
+import { getUserById } from "../services/user.service";
 
 export const UserDropdown: React.FC = () => {
   const { state, signout } = useAuthentication();

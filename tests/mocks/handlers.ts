@@ -1,5 +1,7 @@
 import { http, HttpResponse } from "msw";
 
+const baseUrl = 'https://fetestapi.int.mozzaik365.net/api';
+
 const users = [
   {
     id: "dummy_user_id_1",
@@ -71,7 +73,7 @@ const comments = [
 
 export const handlers = [
   http.post<{}, { username: string; password: string }>(
-    "https://fetestapi.int.mozzaik365.net/api/authentication/login",
+    `${baseUrl}/authentication/login`,
     async ({ request }) => {
       const { username, password } = await request.json();
       if (username === "valid_user" && password === "password") {
@@ -90,7 +92,7 @@ export const handlers = [
     },
   ),
   http.get(
-    "https://fetestapi.int.mozzaik365.net/api/users",
+    `${baseUrl}/users`,
     async ({ request }) => {
       const url = new URL(request.url)
       const ids = url.searchParams.getAll('ids');
@@ -104,7 +106,7 @@ export const handlers = [
     },
   ),
   http.get<{ id: string }>(
-    "https://fetestapi.int.mozzaik365.net/api/users/:id",
+    `${baseUrl}/users/:id`,
     async ({ params }) => {
       const user = users.find(u => params.id === u.id)
       if (user) {
@@ -115,7 +117,7 @@ export const handlers = [
       });
     },
   ),
-  http.get("https://fetestapi.int.mozzaik365.net/api/memes", 
+  http.get(`${baseUrl}/memes`,
     async ({ request }) => {
       const url = new URL(request.url)
       const page = url.searchParams.get('page');
@@ -127,7 +129,7 @@ export const handlers = [
     }
   ),
   http.get<{ id: string }>(
-    "https://fetestapi.int.mozzaik365.net/api/memes/:id/comments",
+    `${baseUrl}/memes/:id/comments`,
     async ({ params }) => {
       const memeComments = comments.filter(
         (comment) => comment.memeId === params.id,
@@ -140,7 +142,7 @@ export const handlers = [
     },
   ),
   http.post<{}, { Picture: File; Description: string; Texts: Array<{ Content: string, X: number, Y: number}>}>(
-    "http://localhost:3344/api/memes",
+    `${baseUrl}/memes`,
     async ({ request }) => {
       const { Description: description, Texts: texts } = await request.json();
       return HttpResponse.json({
@@ -161,7 +163,7 @@ export const handlers = [
     },
   ),
   http.post<{ id: string  }, { content: string; }>(
-    "https://fetestapi.int.mozzaik365.net/api/memes/:id/comments",
+    `${baseUrl}/memes/:id/comments`,
     async ({ request, params }) => {
       const { content } = await request.json();
       return HttpResponse.json({

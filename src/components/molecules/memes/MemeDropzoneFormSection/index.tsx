@@ -51,7 +51,7 @@ const MemeDropzoneFormSection: React.FC<MemeDropzoneFormSectionProps> = ({
               display: "none",
             },
           }}>
-            <MemePicture {...memePicture} />
+            <MemePicture {...memePicture}/>
             <Button
               className="change-picture-button"
               leftIcon={<Icon as={Pencil} boxSize={4} />}

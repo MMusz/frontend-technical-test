@@ -1,16 +1,13 @@
 import { useMemo, useRef } from "react";
 import { Box, Text, useDimensions } from "@chakra-ui/react";
 import { MemeText } from "../../../../types/meme.types";
+import { REF_FONT_SIZE, REF_HEIGHT, REF_WIDTH } from "../../../../constants/meme.constants";
 
 export type MemePictureProps = {
   pictureUrl: string;
   texts: MemeText[];
   dataTestId?: string;
 };
-
-const REF_WIDTH = 800;
-const REF_HEIGHT = 450;
-const REF_FONT_SIZE = 36;
 
 const MemePicture: React.FC<MemePictureProps> = ({
   pictureUrl,

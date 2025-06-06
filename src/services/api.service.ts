@@ -1,6 +1,5 @@
+import { API_CONFIG } from "../config/api";
 import { RequestHeaders, RequestMethod } from "../types/api.types";
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 export class UnauthorizedError extends Error {
   constructor() {
@@ -37,7 +36,7 @@ async function request(method: RequestMethod, url: string, data?: BodyInit, toke
   const headers: RequestHeaders = data && data instanceof FormData 
     ? {}
     : {'Content-Type': 'application/json'};
-    
+
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
@@ -47,7 +46,7 @@ async function request(method: RequestMethod, url: string, data?: BodyInit, toke
     requestOptions.body = data;
   }
 
-  return await fetch(`${BASE_URL}${url}`, requestOptions)
+  return await fetch(`${API_CONFIG.API_URL}${url}`, requestOptions)
     .then(res => handleResponse(res).json());
 }
 

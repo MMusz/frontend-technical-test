@@ -27,7 +27,7 @@ export type MemeCaptionFormSectionProps = {
 const MemeCaptionFormSection: React.FC<MemeCaptionFormSectionProps> = ({ 
   texts,
   isDisabled,
-  onCaptionChange, 
+  onCaptionChange,
   onAddCaption, 
   onDeleteCaption 
 }) => {
@@ -42,8 +42,9 @@ const MemeCaptionFormSection: React.FC<MemeCaptionFormSectionProps> = ({
               onChange={(event) => onCaptionChange(index, 'content', event.target.value)}
             />
             <NumberInput
+              inputMode="numeric"
               value={text.x} 
-              maxW={20} 
+              maxW={20}
               min={0} 
               mr={1}
               onChange={(_, value) => onCaptionChange(index, 'x', value)}
@@ -55,9 +56,10 @@ const MemeCaptionFormSection: React.FC<MemeCaptionFormSectionProps> = ({
               </NumberInputStepper>
             </NumberInput>
             <NumberInput
+              inputMode="numeric"
               value={text.y} 
-              maxW={20} 
-              min={0} 
+              maxW={20}
+              min={0}
               mr={1}
               onChange={(_, value) => onCaptionChange(index, 'y', value)}
             >

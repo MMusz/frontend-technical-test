@@ -20,7 +20,7 @@ const MemeForm: React.FC<MemeFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
-  const [picture, setPicture] = useState<Picture | null>(null);
+  const [picture, setPicture] = useState<Nullable<Picture>>(null);
   const [texts, setTexts] = useState<MemeText[]>([]);
   const [description, setDescription] = useState<string>('');
 
@@ -102,7 +102,10 @@ const MemeForm: React.FC<MemeFormProps> = ({
             <Heading as="h2" size="md" mb={2}>
               Upload your picture
             </Heading>
-            <MemeDropzoneFormSection onDrop={handleDrop} memePicture={memePicture} />
+            <MemeDropzoneFormSection 
+              onDrop={handleDrop}
+              memePicture={memePicture}
+            />
           </Box>
           <Box>
             <Heading as="h2" size="md" mb={2}>

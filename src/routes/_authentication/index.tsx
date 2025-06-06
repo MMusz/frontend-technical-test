@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Flex, StackDivider, VStack } from "@chakra-ui/react";
-import { Loader } from "../../components/loader";
 import { useState } from "react";
 import { useGetMemes } from "../../hooks/features/use-memes";
 import { useGetMemeComments, usePostComment } from "../../hooks/features/use-comments";
 import Alert from "../../components/atoms/Alert";
 import MemeSection from "../../components/organisms/memes/MemeSection";
+import Loader from "../../components/atoms/Loader";
 import LoadMoreButton from "../../components/atoms/LoadMoreButton";
 import { useGetUserById } from "../../hooks/features/use-users";
 import { useAuthProvider } from "../../hooks/features/use-providers";
@@ -54,7 +54,11 @@ export const MemeFeedPage: React.FC = () => {
   return (
     <Flex width="full" height="full" justifyContent="center" overflowY="auto">
       {memeError !== null && (
-        <Alert variant="warning" title="Oops!" description="An error occured, try again later!" />
+        <Alert 
+          variant="warning" 
+          title="Oops!" 
+          description="An error occured, try again later!"
+        />
       )}
       <VStack
         p={4}

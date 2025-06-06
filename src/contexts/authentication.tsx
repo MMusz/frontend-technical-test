@@ -70,3 +70,11 @@ export function useAuthToken() {
   }
   return state.token;
 }
+
+export function useAuthId() {
+  const { state } = useAuthentication();
+  if (!state.isAuthenticated) {
+    throw new Error("User is not authenticated");
+  }
+  return state.userId;
+}

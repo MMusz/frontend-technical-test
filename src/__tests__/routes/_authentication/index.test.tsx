@@ -1,9 +1,12 @@
-import { screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { ChakraProvider } from "@chakra-ui/react";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { AuthenticationContext } from "../../../contexts/authentication";
 import { MemeFeedPage } from "../../../routes/_authentication/index";
 import { renderWithRouter } from "../../utils";
+
+const scrollToMock = vi.fn(() => {});
+vi.stubGlobal('scrollTo', scrollToMock);
 
 describe("routes/_authentication/index", () => {
   describe("MemeFeedPage", () => {
@@ -32,7 +35,7 @@ describe("routes/_authentication/index", () => {
       });
     }
 
-    it("should fetch the memes and display them with their comments", async () => {
+    it("should fetch the first page of memes", async () => {
       renderMemeFeedPage();
 
       await waitFor(() => {
@@ -63,7 +66,69 @@ describe("routes/_authentication/index", () => {
         
         // We check that the right number of comments is displayed
         expect(screen.getByTestId("meme-comments-count-dummy_meme_id_1")).toHaveTextContent('3 comments');
+      });
+    });
+
+    it("should fetch more memes after clicking on load more button", async () => {
+      renderMemeFeedPage();
+
+      await waitFor(() => {
+        // We wait for the memes to be load
+        expect(screen.getByTestId("meme-comments-section-dummy_meme_id_1")).toBeInTheDocument();
+      });
+
+      act(() => {
+        // We click on load more memes
+        const button = screen.getByTestId("meme-load-more-button");
+        fireEvent.click(button);
+      });
+
+      await waitFor(() => {
+        // We check that the right author's username is displayed
+        expect(screen.getByTestId("meme-author-dummy_meme_id_2")).toHaveTextContent('dummy_user_2');
         
+        // We check that the right meme's picture is displayed
+        expect(screen.getByTestId("meme-picture-dummy_meme_id_2")).toHaveStyle({
+          'background-image': 'url("https://dummy.url/meme/2")',
+        });
+
+        // We check that the right texts are displayed at the right positions
+        const text1 = screen.getByTestId("meme-picture-dummy_meme_id_2-text-0");
+        const text2 = screen.getByTestId("meme-picture-dummy_meme_id_2-text-1");
+        expect(text1).toHaveTextContent('dummy text 1');
+        expect(text1).toHaveStyle({
+          'top': '0px',
+          'left': '0px',
+        });
+        expect(text2).toHaveTextContent('dummy text 2');
+        expect(text2).toHaveStyle({
+          'top': '100px',
+          'left': '100px',
+        });
+
+        // We check that the right description is displayed
+        expect(screen.getByTestId("meme-description-dummy_meme_id_2")).toHaveTextContent('dummy meme 2');
+        
+        // We check that the right number of comments is displayed
+        expect(screen.getByTestId("meme-comments-count-dummy_meme_id_2")).toHaveTextContent('2 comments');
+      });
+    });
+
+    it("should fetch the first page of comments on collapsing comment section", async () => {
+      renderMemeFeedPage();
+
+      await waitFor(() => {
+        // We wait for the memes to be load
+        expect(screen.getByTestId("meme-comments-section-dummy_meme_id_1")).toBeInTheDocument();
+      });
+
+      act(() => {
+        // We collapse the comment section to trigger the load of comment
+        const collapseLink = screen.getByTestId("meme-comments-section-dummy_meme_id_1");
+        fireEvent.click(collapseLink);
+      });
+
+      await waitFor(() => {
         // We check that the right comments with the right authors are displayed
         expect(screen.getByTestId("meme-comment-content-dummy_meme_id_1-dummy_comment_id_1")).toHaveTextContent('dummy comment 1');
         expect(screen.getByTestId("meme-comment-author-dummy_meme_id_1-dummy_comment_id_1")).toHaveTextContent('dummy_user_1');

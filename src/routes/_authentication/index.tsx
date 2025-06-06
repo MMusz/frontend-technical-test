@@ -12,6 +12,7 @@ import {
   Text,
   Input,
   VStack,
+  Button,
 } from "@chakra-ui/react";
 import { CaretDown, CaretUp, Chat } from "@phosphor-icons/react";
 import { format } from "timeago.js";
@@ -20,63 +21,40 @@ import { Loader } from "../../components/loader";
 import { MemePicture } from "../../components/meme-picture";
 import { useState } from "react";
 import { jwtDecode } from "jwt-decode";
-import { createMemeComment, getMemeComments, getMemes } from "../../services/meme.service";
+import { createMemeComment } from "../../services/meme.service";
 import { getUserById } from "../../services/user.service";
-import { GetCommentsApiResponse } from "../../types/comment.types";
-import { GetMemesApiResponse } from "../../types/meme.types";
-import { User } from "../../types/user.types";
+import { useGetMemes } from "../../hooks/features/use-memes";
+import { useGetMemeComments } from "../../hooks/features/use-comments";
 
 export const MemeFeedPage: React.FC = () => {
   const token = useAuthToken();
-  const { isLoading, data: memes } = useQuery({
-    queryKey: ["memes"],
-    queryFn: async () => {
-      const memes: GetMemesApiResponse["results"] = [];
-      const firstPage = await getMemes(token, 1);
-      memes.push(...firstPage.results);
-      const remainingPages =
-        Math.ceil(firstPage.total / firstPage.pageSize) - 1;
-      for (let i = 0; i < remainingPages; i++) {
-        const page = await getMemes(token, i + 2);
-        memes.push(...page.results);
-      }
-      const memesWithAuthorAndComments = [];
-      for (let meme of memes) {
-        const author = await getUserById(token, meme.authorId);
-        const comments: GetCommentsApiResponse["results"] = [];
-        const firstPage = await getMemeComments(token, meme.id, 1);
-        comments.push(...firstPage.results);
-        const remainingCommentPages =
-          Math.ceil(firstPage.total / firstPage.pageSize) - 1;
-        for (let i = 0; i < remainingCommentPages; i++) {
-          const page = await getMemeComments(token, meme.id, i + 2);
-          comments.push(...page.results);
-        }
-        const commentsWithAuthor: (GetCommentsApiResponse["results"][0] & {
-          author: User;
-        })[] = [];
-        for (let comment of comments) {
-          const author = await getUserById(token, comment.authorId);
-          commentsWithAuthor.push({ ...comment, author });
-        }
-        memesWithAuthorAndComments.push({
-          ...meme,
-          author,
-          comments: commentsWithAuthor,
-        });
-      }
-      return memesWithAuthorAndComments;
-    },
-  });
+  const [openedCommentSection, setOpenedCommentSection] = useState<
+    string | null
+  >(null);
+
+  const { 
+    data: memes, 
+    isFetching: isLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useGetMemes();
+
+  const { 
+    data: comments,
+    isFetching: isFetchingComments,
+    isFetchingNextPage: isFetchingMoreComments,
+    fetchNextPage: fetchMoreComments,
+    hasNextPage: hasMoreComments,
+  } = useGetMemeComments(openedCommentSection);
+
   const { data: user } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
       return await getUserById(token, jwtDecode<{ id: string }>(token).id);
     },
   });
-  const [openedCommentSection, setOpenedCommentSection] = useState<
-    string | null
-  >(null);
+  
   const [commentContent, setCommentContent] = useState<{
     [key: string]: string;
   }>({});
@@ -96,8 +74,8 @@ export const MemeFeedPage: React.FC = () => {
         maxWidth={800}
         divider={<StackDivider border="gray.200" />}
       >
-        {memes?.map((meme) => {
-          return (
+        {memes?.pages.map((page) => {
+          return page.results.map(meme =>
             <VStack key={meme.id} p={4} width="full" align="stretch">
               <Flex justifyContent="space-between" alignItems="center">
                 <Flex>
@@ -105,10 +83,10 @@ export const MemeFeedPage: React.FC = () => {
                     borderWidth="1px"
                     borderColor="gray.300"
                     size="xs"
-                    name={meme.author.username}
-                    src={meme.author.pictureUrl}
+                    name={meme.author?.username}
+                    src={meme.author?.pictureUrl}
                   />
-                  <Text ml={2} data-testid={`meme-author-${meme.id}`}>{meme.author.username}</Text>
+                  <Text ml={2} data-testid={`meme-author-${meme.id}`}>{meme.author?.username}</Text>
                 </Flex>
                 <Text fontStyle="italic" color="gray.500" fontSize="small">
                   {format(meme.createdAt)}
@@ -191,43 +169,71 @@ export const MemeFeedPage: React.FC = () => {
                   </form>
                 </Box>
                 <VStack align="stretch" spacing={4}>
-                  {meme.comments.map((comment) => (
-                    <Flex key={comment.id}>
-                      <Avatar
-                        borderWidth="1px"
-                        borderColor="gray.300"
-                        size="sm"
-                        name={comment.author.username}
-                        src={comment.author.pictureUrl}
-                        mr={2}
-                      />
-                      <Box p={2} borderRadius={8} bg="gray.50" flexGrow={1}>
-                        <Flex
-                          justifyContent="space-between"
-                          alignItems="center"
-                        >
-                          <Flex>
-                            <Text data-testid={`meme-comment-author-${meme.id}-${comment.id}`}>{comment.author.username}</Text>
-                          </Flex>
-                          <Text
-                            fontStyle="italic"
-                            color="gray.500"
-                            fontSize="small"
+                  {comments?.pages.map((page) => {
+                    return page.results.map(comment =>
+                      <Flex key={comment.id}>
+                        <Avatar
+                          borderWidth="1px"
+                          borderColor="gray.300"
+                          size="sm"
+                          name={comment.author?.username}
+                          src={comment.author?.pictureUrl}
+                          mr={2}
+                        />
+                        <Box p={2} borderRadius={8} bg="gray.50" flexGrow={1}>
+                          <Flex
+                            justifyContent="space-between"
+                            alignItems="center"
                           >
-                            {format(comment.createdAt)}
+                            <Flex>
+                              <Text data-testid={`meme-comment-author-${meme.id}-${comment.id}`}>{comment.author?.username}</Text>
+                            </Flex>
+                            <Text
+                              fontStyle="italic"
+                              color="gray.500"
+                              fontSize="small"
+                            >
+                              {format(comment.createdAt)}
+                            </Text>
+                          </Flex>
+                          <Text color="gray.500" whiteSpace="pre-line" data-testid={`meme-comment-content-${meme.id}-${comment.id}`}>
+                            {comment.content}
                           </Text>
-                        </Flex>
-                        <Text color="gray.500" whiteSpace="pre-line" data-testid={`meme-comment-content-${meme.id}-${comment.id}`}>
-                          {comment.content}
-                        </Text>
-                      </Box>
+                        </Box>
+                      </Flex>
+                    )}
+                  )}
+                  {hasMoreComments && (
+                    <Flex width="full" justifyContent="center">
+                      <Button
+                        data-testid={'comment-load-more-button'}
+                        isLoading={isFetchingMoreComments}
+                        loadingText="Loading more..."
+                        disabled={isFetchingComments}
+                        onClick={() => fetchMoreComments()}
+                      >
+                        Load More
+                      </Button>
                     </Flex>
-                  ))}
+                  )}
                 </VStack>
               </Collapse>
             </VStack>
           );
         })}
+        {hasNextPage && (
+          <Flex width="full" justifyContent="center">
+            <Button
+              data-testid={'meme-load-more-button'}
+              isLoading={isFetchingNextPage}
+              loadingText="Loading more..."
+              disabled={isLoading}
+              onClick={() => fetchNextPage()}
+            >
+              Load More
+            </Button>
+          </Flex>
+        )}
       </VStack>
     </Flex>
   );

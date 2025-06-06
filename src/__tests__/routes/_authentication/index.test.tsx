@@ -20,7 +20,7 @@ describe("routes/_authentication/index", () => {
                 value={{
                   state: {
                     isAuthenticated: true,
-                    userId: "dummy_user_id",
+                    userId: "dummy_user_id_1",
                     token: "dummy_token",
                   },
                   authenticate: () => {},

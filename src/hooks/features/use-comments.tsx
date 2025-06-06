@@ -1,5 +1,5 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { getMemeComments } from "../../services/meme.service";
+import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
+import { createMemeComment, getMemeComments } from "../../services/meme.service";
 import { GetCommentsApiResponse, PaginatedComments } from "../../types/comment.types";
 import { Nullable } from "../../types/global.types";
 import { getNexPage } from "../../utils/pagination.utils";
@@ -42,5 +42,18 @@ export function useGetMemeComments(memeId: Nullable<string>) {
     initialPageParam: 1,
     getNextPageParam: (lastPage, _, lastPageParam) => 
       getNexPage(lastPageParam as number, lastPage.pageSize, lastPage.total),
+  });
+}
+
+/**
+ * Hook allowing to post a new comment on a specific meme
+ */
+export function usePostComment() {
+  const { token } = useAuthProvider();
+
+  return useMutation({
+    mutationFn: async (data: { memeId: string; content: string }) => {
+      await createMemeComment(token, data.memeId, data.content);
+    },
   });
 }

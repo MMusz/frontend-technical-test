@@ -12,7 +12,7 @@ export type Meme = {
   authorId: string;
   pictureUrl: string;
   description: string;
-  commentsCount: string;
+  commentsCount: number;
   texts: MemeText[];
   createdAt: string;
 };

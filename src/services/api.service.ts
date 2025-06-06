@@ -34,11 +34,10 @@ function handleResponse(response: Response) {
 }
 
 async function request(method: RequestMethod, url: string, data?: BodyInit, token?: string) {
-  const headers: RequestHeaders = { 
-    'Content-Type': data && data instanceof FormData
-      ? 'multipart/form-data'
-      : 'application/json' 
-  };
+  const headers: RequestHeaders = data && data instanceof FormData 
+    ? {}
+    : {'Content-Type': 'application/json'};
+    
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }

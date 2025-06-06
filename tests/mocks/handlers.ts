@@ -139,6 +139,27 @@ export const handlers = [
       });
     },
   ),
+  http.post<{}, { Picture: File; Description: string; Texts: Array<{ Content: string, X: number, Y: number}>}>(
+    "http://localhost:3344/api/memes",
+    async ({ request }) => {
+      const { Description: description, Texts: texts } = await request.json();
+      return HttpResponse.json({
+        description,
+        texts: [
+          {
+            ...texts[0],
+            x: 0, 
+            y: 0
+          }
+        ],
+        id: "dummy_meme_id_4",
+        authorId: "dummy_user_id_1",
+        pictureUrl: "https://dummy.url/meme/4",
+        commentsCount: 0,
+        createdAt: "2021-09-01T12:00:00Z",
+      });
+    },
+  ),
   http.post<{ id: string  }, { content: string; }>(
     "https://fetestapi.int.mozzaik365.net/api/memes/:id/comments",
     async ({ request, params }) => {

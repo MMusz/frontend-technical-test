@@ -1,5 +1,5 @@
 import { GetCommentsApiResponse } from "../types/comment.types";
-import { GetMemesApiResponse } from "../types/meme.types";
+import { GetMemesApiResponse, Meme, PostMemeApiRequestData } from "../types/meme.types";
 import api from "./api.service";
 
 /**
@@ -32,4 +32,24 @@ export async function getMemeComments(token: string, memeId: string, page: numbe
  */
 export async function createMemeComment(token: string, memeId: string, content: string): Promise<Comment> {
   return await api.post(`/memes/${memeId}/comments`, JSON.stringify({ content }), token);
+}
+
+/**
+ * Create a meme
+ * @param {string} token
+ * @param {PostMemeApiRequestData} data
+ * @returns {Promise<Meme>}
+ */
+export async function createMeme(token: string, data: PostMemeApiRequestData): Promise<Meme> {
+  const { picture, description, texts } = data;
+  const formData = new FormData();
+  formData.append('Picture', picture);
+  formData.append('Description', description);
+  texts.forEach((text, idx) => {
+    formData.append(`Texts[${idx}][Content]`, text.content);
+    formData.append(`Texts[${idx}][X]`, text.x.toString());
+    formData.append(`Texts[${idx}][Y]`, text.y.toString());
+  });
+
+  return await api.post(`/memes`, formData, token);
 }

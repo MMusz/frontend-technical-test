@@ -1,6 +1,6 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { getMemes } from "../../services/meme.service";
-import { GetMemesApiResponse, PaginatedMemes } from "../../types/meme.types";
+import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
+import { createMeme, getMemes } from "../../services/meme.service";
+import { GetMemesApiResponse, PaginatedMemes, PostMemeApiRequestData } from "../../types/meme.types";
 import { User } from "../../types/user.types";
 import { getNexPage } from "../../utils/pagination.utils";
 
@@ -39,4 +39,17 @@ export function useGetMemes() {
     getNextPageParam: (lastPage, _, lastPageParam) => 
       getNexPage(lastPageParam as number, lastPage.pageSize, lastPage.total)
   });
+}
+
+/**
+ * Hook allowing to create a new meme
+ */
+export function usePostMeme() {
+  const { token } = useAuthProvider();
+
+  return useMutation({
+    mutationFn: async (data: PostMemeApiRequestData) => {
+      await createMeme(token, data);
+    }
+  })
 }

@@ -24,3 +24,20 @@ export type MemeWithAuthors = Meme & {
 export type PaginatedMemes = PaginatedResult<MemeWithAuthors>;
 
 export type GetMemesApiResponse = PaginatedResult<Meme>;
+
+export type Picture = {
+  url: string;
+  file: File;
+};
+
+export type MemePicture = {
+  description: string;
+  pictureUrl: string;
+  texts: MemeText[];
+}
+
+export type PostMemeApiRequestData = Pick<MemePicture, 'description' | 'texts'> & {
+  picture: File;
+};
+
+export type CompleteMemePicture = MemePicture & PostMemeApiRequestData & { dataTestId?: string };

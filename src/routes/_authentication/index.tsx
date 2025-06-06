@@ -15,27 +15,23 @@ import {
 } from "@chakra-ui/react";
 import { CaretDown, CaretUp, Chat } from "@phosphor-icons/react";
 import { format } from "timeago.js";
-import {
-  createMemeComment,
-  getMemeComments,
-  GetMemeCommentsResponse,
-  getMemes,
-  GetMemesResponse,
-  getUserById,
-  GetUserByIdResponse,
-} from "../../api";
 import { useAuthToken } from "../../contexts/authentication";
 import { Loader } from "../../components/loader";
 import { MemePicture } from "../../components/meme-picture";
 import { useState } from "react";
 import { jwtDecode } from "jwt-decode";
+import { createMemeComment, getMemeComments, getMemes } from "../../services/meme.service";
+import { getUserById } from "../../services/user.service";
+import { GetCommentsApiResponse } from "../../types/comment.types";
+import { GetMemesApiResponse } from "../../types/meme.types";
+import { User } from "../../types/user.types";
 
 export const MemeFeedPage: React.FC = () => {
   const token = useAuthToken();
   const { isLoading, data: memes } = useQuery({
     queryKey: ["memes"],
     queryFn: async () => {
-      const memes: GetMemesResponse["results"] = [];
+      const memes: GetMemesApiResponse["results"] = [];
       const firstPage = await getMemes(token, 1);
       memes.push(...firstPage.results);
       const remainingPages =
@@ -47,7 +43,7 @@ export const MemeFeedPage: React.FC = () => {
       const memesWithAuthorAndComments = [];
       for (let meme of memes) {
         const author = await getUserById(token, meme.authorId);
-        const comments: GetMemeCommentsResponse["results"] = [];
+        const comments: GetCommentsApiResponse["results"] = [];
         const firstPage = await getMemeComments(token, meme.id, 1);
         comments.push(...firstPage.results);
         const remainingCommentPages =
@@ -56,8 +52,8 @@ export const MemeFeedPage: React.FC = () => {
           const page = await getMemeComments(token, meme.id, i + 2);
           comments.push(...page.results);
         }
-        const commentsWithAuthor: (GetMemeCommentsResponse["results"][0] & {
-          author: GetUserByIdResponse;
+        const commentsWithAuthor: (GetCommentsApiResponse["results"][0] & {
+          author: User;
         })[] = [];
         for (let comment of comments) {
           const author = await getUserById(token, comment.authorId);

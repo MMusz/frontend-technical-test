@@ -11,16 +11,13 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { login, UnauthorizedError } from "../api";
 import { useAuthentication } from "../contexts/authentication";
+import { LoginRequestData } from "../types/auth.types";
+import { UnauthorizedError } from "../services/api.service";
+import { login } from "../services/auth.service";
 
 type SearchParams = {
   redirect?: string;
-};
-
-type Inputs = {
-  username: string;
-  password: string;
 };
 
 function renderError(error: Error) {
@@ -38,13 +35,13 @@ export const LoginPage: React.FC = () => {
   const { redirect } = Route.useSearch();
   const { state, authenticate } = useAuthentication();
   const { mutate, isPending, error } = useMutation({
-    mutationFn: (data: Inputs) => login(data.username, data.password),
+    mutationFn: (data: LoginRequestData) => login(data.username, data.password),
     onSuccess: ({ jwt }) => {
       authenticate(jwt);
     }
   });
-  const { register, handleSubmit } = useForm<Inputs>();
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+  const { register, handleSubmit } = useForm<LoginRequestData>();
+  const onSubmit: SubmitHandler<LoginRequestData> = async (data) => {
     mutate(data);
   };
 

@@ -7,16 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
-
-export type AuthenticationState =
-  | {
-      isAuthenticated: true;
-      token: string;
-      userId: string;
-    }
-  | {
-      isAuthenticated: false;
-    };
+import { AuthenticationState } from "../types/auth.types";
 
 export type Authentication = {
   state: AuthenticationState;

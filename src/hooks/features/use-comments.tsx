@@ -1,10 +1,11 @@
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { createMemeComment, getMemeComments } from "../../services/meme.service";
 import { GetCommentsApiResponse, PaginatedComments } from "../../types/comment.types";
-import { Nullable } from "../../types/global.types";
+import { DataQueryPages, Nullable } from "../../types/global.types";
 import { getNexPage } from "../../utils/pagination.utils";
-import { useAuthProvider } from "./use-providers";
+import { useAuthProvider, useProviders } from "./use-providers";
 import { useGetUsersFromCacheOrServer } from "./use-users";
+import { PaginatedMemes } from "../../types/meme.types";
 
 /**
  * Hook allowing to get meme's comments page by page
@@ -49,11 +50,70 @@ export function useGetMemeComments(memeId: Nullable<string>) {
  * Hook allowing to post a new comment on a specific meme
  */
 export function usePostComment() {
-  const { token } = useAuthProvider();
+  const { queryClient, token, id: authorId } = useProviders();
+  const { fetchUsers } = useGetUsersFromCacheOrServer();
 
   return useMutation({
     mutationFn: async (data: { memeId: string; content: string }) => {
-      await createMemeComment(token, data.memeId, data.content);
+      const { memeId, content } = data;
+      const comment: Comment = await createMemeComment(token, memeId, content);
+
+      const authors = await fetchUsers([authorId]);
+
+      await queryClient.cancelQueries({ queryKey: ['comments', { memeId }] });
+      queryClient.setQueryData(['comments', { memeId }], (oldData: DataQueryPages<PaginatedComments>) => {
+        if (!oldData) {
+          return oldData;
+        }
+
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => ({
+            ...page,
+            results: [
+              {
+                ...comment,
+                author: authors.find(a => a.id === authorId)
+              },
+              ...page.results,
+            ]
+          }))
+        }
+      })
+    },
+    onMutate: async (data: { memeId: string; content: string }) => {
+      const { memeId } = data;
+      await queryClient.cancelQueries({ queryKey: ['memes'] });
+      const previousMemes = queryClient.getQueryData(['memes']);
+      queryClient.setQueryData(['memes'], (oldData: DataQueryPages<PaginatedMemes>) => {
+        if (!oldData) {
+          return oldData;
+        }
+
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => ({
+            ...page,
+            results: page.results.map((meme) =>
+              meme.id === memeId
+                ? { 
+                  ...meme,
+                  commentsCount: meme.commentsCount + 1 
+                }
+                : meme
+            )
+          }))
+        }
+      });
+
+      return { 
+        previousMemes,
+      };
+    },
+    onError: (_, __, context) => {
+      if (context?.previousMemes) {
+        queryClient.setQueryData(['memes'], context.previousMemes);
+      }
     },
   });
 }

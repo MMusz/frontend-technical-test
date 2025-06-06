@@ -7,3 +7,8 @@ export type PaginatedResult<T> = {
   pageSize: number;
   results: T[];
 };
+
+export type DataQueryPages<T> = { 
+  pages: T[];
+  pageParams: number[];
+};

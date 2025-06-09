@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-router";
 import { render } from "@testing-library/react";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createTestRouter(component: (...args: any) => React.ReactNode, currentUrl: string) {
   const rootRoute = createRootRoute({
     component: Outlet,
@@ -31,6 +32,7 @@ function createTestRouter(component: (...args: any) => React.ReactNode, currentU
 }
 
 type RenderWithRouterParams = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   component: (...args: any) => React.ReactNode;
   Wrapper?: React.ComponentType<PropsWithChildren>;
   onNavigate?: ListenerFn<RouterEvents['onBeforeNavigate']>;
@@ -47,7 +49,7 @@ export function renderWithRouter({
   router.subscribe('onBeforeNavigate', onNavigate);
   const renderResult = render(
     <Wrapper>
-      {/* @ts-expect-error */}
+      {/* @ts-expect-error typing error */}
       <RouterProvider router={router} />;
     </Wrapper>,
   );

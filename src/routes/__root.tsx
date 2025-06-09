@@ -11,12 +11,10 @@ import {
   Link,
   Outlet,
 } from "@tanstack/react-router";
-import {
-  AuthenticationState,
-  useAuthentication,
-} from "../contexts/authentication";
+import { useAuthentication } from "../contexts/authentication";
 import { UserDropdown } from "../components/user-dropdown";
 import { Plus } from "@phosphor-icons/react";
+import { AuthenticationState } from "../types/auth.types";
 
 type RouterContext = {
   authState: AuthenticationState;

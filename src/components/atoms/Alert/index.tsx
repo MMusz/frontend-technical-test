@@ -4,18 +4,20 @@ export type AlertProps = {
   variant: 'error' | 'success' | 'warning' | 'info';
   title: string;
   description: string;
+  dataTestId?: string;
 }
 
 const Alert: React.FC<AlertProps> = ({
   variant,
   title,
   description,
+  dataTestId,
 }) => {
   return (
-    <AlertCore status={variant}>
+    <AlertCore status={variant} data-testid={dataTestId}>
       <AlertIcon />
-      <AlertTitle>{title}</AlertTitle>
-      <AlertDescription>{description}</AlertDescription>
+      <AlertTitle data-testid={`${dataTestId}-title`}>{title}</AlertTitle>
+      <AlertDescription data-testid={`${dataTestId}-description`}>{description}</AlertDescription>
     </AlertCore>
   )
 };

@@ -1,7 +1,7 @@
 import { AspectRatio, Box, Button, Flex, Icon, Text } from "@chakra-ui/react";
 import { Image,Pencil } from "@phosphor-icons/react";
 import { useDropzone } from "react-dropzone";
-import { MemeText } from "../../../../types/meme.types";
+import { MemeText, PictureDimension } from "../../../../types/meme.types";
 import MemePicture from "../MemePicture";
 
 export type MemeDropzoneFormSectionProps = {
@@ -11,11 +11,13 @@ export type MemeDropzoneFormSectionProps = {
     dataTestId?: string; 
   };
   onDrop: (file: File) => void;
+  onPictureDimensionChange?: (dim: PictureDimension) => void;
 };
 
 const MemeDropzoneFormSection: React.FC<MemeDropzoneFormSectionProps> = ({
   memePicture,
   onDrop,
+  onPictureDimensionChange,
 }) => {
   
   const { getRootProps, getInputProps, open } = useDropzone({
@@ -51,7 +53,10 @@ const MemeDropzoneFormSection: React.FC<MemeDropzoneFormSectionProps> = ({
               display: "none",
             },
           }}>
-            <MemePicture {...memePicture}/>
+            <MemePicture 
+              {...memePicture}
+              onDimensionChange={onPictureDimensionChange}
+            />
             <Button
               className="change-picture-button"
               leftIcon={<Icon as={Pencil} boxSize={4} />}

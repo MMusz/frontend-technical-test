@@ -5,7 +5,13 @@ export type MemeText = {
   content: string;
   x: number;
   y: number;
+  ref?: React.RefObject<HTMLParagraphElement>;
 };
+
+export type CaptionInput = {
+  maxWidth?: number;
+  maxHeight?: number;
+}
 
 export type Meme = {
   id: string;
@@ -24,6 +30,11 @@ export type MemeWithAuthors = Meme & {
 export type PaginatedMemes = PaginatedResult<MemeWithAuthors>;
 
 export type GetMemesApiResponse = PaginatedResult<Meme>;
+
+export type PictureDimension = {
+  height: Opt<number>;
+  width: Opt<number>;
+};
 
 export type Picture = {
   url: string;

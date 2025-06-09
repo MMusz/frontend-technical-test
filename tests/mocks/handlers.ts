@@ -1,6 +1,7 @@
 import { http, HttpResponse } from "msw";
 
-const baseUrl = 'https://fetestapi.int.mozzaik365.net/api';
+//const baseUrl = 'https://fetestapi.int.mozzaik365.net/api';
+const baseUrl = 'http://localhost:3344/api';
 
 const users = [
   {
@@ -72,7 +73,7 @@ const comments = [
 ]
 
 export const handlers = [
-  http.post<{}, { username: string; password: string }>(
+  http.post<NonNullable<unknown>, { username: string; password: string }>(
     `${baseUrl}/authentication/login`,
     async ({ request }) => {
       const { username, password } = await request.json();
@@ -141,27 +142,25 @@ export const handlers = [
       });
     },
   ),
-  http.post<{}, { Picture: File; Description: string; Texts: Array<{ Content: string, X: number, Y: number}>}>(
-    `${baseUrl}/memes`,
-    async ({ request }) => {
-      const { Description: description, Texts: texts } = await request.json();
-      return HttpResponse.json({
-        description,
-        texts: [
-          {
-            ...texts[0],
-            x: 0, 
-            y: 0
-          }
-        ],
-        id: "dummy_meme_id_4",
-        authorId: "dummy_user_id_1",
-        pictureUrl: "https://dummy.url/meme/4",
-        commentsCount: 0,
-        createdAt: "2021-09-01T12:00:00Z",
-      });
-    },
-  ),
+  http.post(`${baseUrl}/memes`, async () => {
+    // request.formData() does not work here, need another solution to fake errors
+    
+    return HttpResponse.json({
+      description: 'test',
+      texts: [
+        {
+          content: 'caption 1',
+          x: 0, 
+          y: 0
+        }
+      ],
+      id: "dummy_meme_id_4",
+      authorId: "dummy_user_id_1",
+      pictureUrl: "https://dummy.url/meme/4",
+      commentsCount: 0,
+      createdAt: "2021-09-01T12:00:00Z",
+    });
+  }),
   http.post<{ id: string  }, { content: string; }>(
     `${baseUrl}/memes/:id/comments`,
     async ({ request, params }) => {

@@ -19,17 +19,28 @@ export class BadRequestError extends Error {
   }
 }
 
+export class ServerError extends Error {
+  constructor() {
+    super('Server error');
+  }
+}
+
 function handleResponse(response: Response) {
-  if (response.status === 401) {
-    throw new UnauthorizedError();
+  switch (response.status) {
+    case 400:
+      throw new BadRequestError();
+    case 401:
+      throw new UnauthorizedError();
+    case 404:
+      throw new NotFoundError();
+    case 500:
+      throw new ServerError();
+    default:
+      if (response.status < 200 || response.status > 299) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      return response;
   }
-  if (response.status === 404) {
-    throw new NotFoundError();
-  }
-  if (response.status === 400) {
-    throw new BadRequestError();
-  }
-  return response;
 }
 
 async function request(method: RequestMethod, url: string, data?: BodyInit, token?: string) {

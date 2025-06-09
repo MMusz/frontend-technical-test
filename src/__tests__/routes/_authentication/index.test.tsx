@@ -5,9 +5,6 @@ import { AuthenticationContext } from "../../../contexts/authentication";
 import { MemeFeedPage } from "../../../routes/_authentication/index";
 import { renderWithRouter } from "../../utils";
 
-const scrollToMock = vi.fn(() => {});
-vi.stubGlobal('scrollTo', scrollToMock);
-
 describe("routes/_authentication/index", () => {
   describe("MemeFeedPage", () => {
     function renderMemeFeedPage() {
@@ -140,7 +137,7 @@ describe("routes/_authentication/index", () => {
         expect(screen.getByTestId("meme-comment-author-dummy_meme_id_1-dummy_comment_id_3")).toHaveTextContent('dummy_user_3');
       });
     });
-    
+
     it("should show comment right after it has been posted", async () => {
       renderMemeFeedPage();
 

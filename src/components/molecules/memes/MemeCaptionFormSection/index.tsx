@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { 
   Box,
   Button,
@@ -14,11 +14,14 @@ import {
   VStack 
 } from "@chakra-ui/react";
 import { Plus, Trash } from "@phosphor-icons/react";
-import { MemeText } from "../../../../types/meme.types";
+import { CaptionInput, MemeText } from "../../../../types/meme.types";
+import { Opt } from "../../../../types/global.types";
 
 export type MemeCaptionFormSectionProps = {
   texts: MemeText[];
   isDisabled: boolean;
+  maxWidth: Opt<number>;
+  maxHeight: Opt<number>;
   onCaptionChange: (index: number, key: string, value: string | number) => void;
   onAddCaption: () => void;
   onDeleteCaption: (index: number) => void;
@@ -27,10 +30,31 @@ export type MemeCaptionFormSectionProps = {
 const MemeCaptionFormSection: React.FC<MemeCaptionFormSectionProps> = ({ 
   texts,
   isDisabled,
+  maxWidth,
+  maxHeight,
   onCaptionChange,
   onAddCaption, 
   onDeleteCaption 
 }) => {
+  const captions: CaptionInput[] = useMemo(() => {
+    return texts.map(text => {
+      if (!text.ref?.current) {
+        return {
+          maxWidth: undefined,
+          maxHeight: undefined,
+        };
+      }
+      
+      const elDim  = text.ref.current.getBoundingClientRect();
+      const maxW = maxWidth ? Math.round(maxWidth - elDim.width) : undefined;
+      const maxH = maxHeight ? Math.round(maxHeight - elDim.height) : undefined;
+      return {
+        maxWidth: maxW,
+        maxHeight: maxH,
+      }
+    })
+  }, [texts, maxWidth, maxHeight]);
+
   return (
     <Box p={4} flexGrow={1} height={0} overflowY="auto">
       <VStack>
@@ -46,6 +70,7 @@ const MemeCaptionFormSection: React.FC<MemeCaptionFormSectionProps> = ({
               value={text.x} 
               maxW={20}
               min={0} 
+              max={captions[index].maxWidth} 
               mr={1}
               onChange={(_, value) => onCaptionChange(index, 'x', value)}
             >
@@ -60,6 +85,7 @@ const MemeCaptionFormSection: React.FC<MemeCaptionFormSectionProps> = ({
               value={text.y} 
               maxW={20}
               min={0}
+              max={captions[index].maxHeight}
               mr={1}
               onChange={(_, value) => onCaptionChange(index, 'y', value)}
             >

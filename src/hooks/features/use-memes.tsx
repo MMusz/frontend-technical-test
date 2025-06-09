@@ -48,8 +48,8 @@ export function usePostMeme() {
   const { token } = useAuthProvider();
 
   return useMutation({
-    mutationFn: async (data: PostMemeApiRequestData) => {
-      await createMeme(token, data);
-    }
+    mutationFn: (data: PostMemeApiRequestData) => {
+      return createMeme(token, data);
+    },
   })
 }

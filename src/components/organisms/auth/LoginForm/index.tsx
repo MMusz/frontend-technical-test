@@ -2,10 +2,11 @@ import React from "react"
 import { Button, Flex, FormControl, FormLabel, Heading, Input, Text, FormErrorMessage } from "@chakra-ui/react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { BadRequestError, UnauthorizedError } from "../../../../services/api.service";
+import { Nullable } from "../../../../types/global.types";
 import { LoginRequestData } from "../../../../types/auth.types";
 
 export type LoginFormProps = {
-  error: BadRequestError | UnauthorizedError | Error;
+  error: Nullable<BadRequestError | UnauthorizedError | Error>;
   isLoading: boolean;
   onSubmit: SubmitHandler<LoginRequestData>;
 };

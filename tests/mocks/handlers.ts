@@ -1,7 +1,6 @@
 import { http, HttpResponse } from "msw";
 
-//const baseUrl = 'https://fetestapi.int.mozzaik365.net/api';
-const baseUrl = 'http://localhost:3344/api';
+const baseUrl = 'https://fetestapi.int.mozzaik365.net/api';
 
 const users = [
   {

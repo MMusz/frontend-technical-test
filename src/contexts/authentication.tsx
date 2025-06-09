@@ -4,10 +4,13 @@ import {
   PropsWithChildren,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
 import { AuthenticationState } from "../types/auth.types";
+import { AUTH_STORAGE_KEY } from "../config/auth";
+import { isTokenExpired } from "../utils/token.utils";
 
 export type Authentication = {
   state: AuthenticationState;
@@ -33,18 +36,29 @@ export const AuthenticationProvider: React.FC<PropsWithChildren> = ({
         token,
         userId: jwtDecode<{ id: string }>(token).id,
       });
+      localStorage.setItem(AUTH_STORAGE_KEY, token);
     },
     [setState],
   );
 
   const signout = useCallback(() => {
     setState({ isAuthenticated: false });
+    localStorage.removeItem(AUTH_STORAGE_KEY);
   }, [setState]);
 
   const contextValue = useMemo(
     () => ({ state, authenticate, signout }),
     [state, authenticate, signout],
   );
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (storedToken && !isTokenExpired(storedToken)) {
+      authenticate(storedToken);
+    } else {
+      signout();
+    }
+  }, [authenticate, signout]);
 
   return (
     <AuthenticationContext.Provider value={contextValue}>

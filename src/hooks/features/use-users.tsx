@@ -3,6 +3,7 @@ import { getUserById, getUsers } from "../../services/user.service";
 import { Opt } from "../../types/global.types";
 import { User } from "../../types/user.types";
 import { useAuthProvider, useProviders, useQueryProvider } from "./use-providers";
+import { useApi } from "./use-api";
 
 /**
  * Hook allowing to get cached users
@@ -27,6 +28,7 @@ export function useGetUsersFromCache() {
 export function useGetUsersFromCacheOrServer() {
   const { queryClient, token } = useProviders();
   const { getUsersFromCache } = useGetUsersFromCache();
+  const { privateCall } = useApi();
 
   const fetchUsers = async (ids: string[]) => {
     const cachedUsers: User[] = getUsersFromCache();
@@ -34,7 +36,9 @@ export function useGetUsersFromCacheOrServer() {
     const uncachedUserIds: string[] = ids.filter(id => 
       !cachedUsers.find(ca => ca.id === id)
     );
-    const uncachedUsers = uncachedUserIds.length ? await getUsers(token, uncachedUserIds) : [];
+    const uncachedUsers = uncachedUserIds.length 
+      ? await privateCall(() => getUsers(token, uncachedUserIds))
+      : [];
     const users = [...cachedUsers, ...uncachedUsers];
     
     users.forEach(el => {
@@ -54,11 +58,12 @@ export function useGetUsersFromCacheOrServer() {
  */
 export function useGetUsersByIds(ids: string[]) {
   const { token } = useAuthProvider();
+  const { privateCall } = useApi();
 
   return useQuery({
     queryKey: ["users"],
     queryFn: async () => {
-      return await getUsers(token, ids);
+      return await privateCall(() => getUsers(token, ids));
     },
     enabled: !!ids,
   });
@@ -69,6 +74,7 @@ export function useGetUsersByIds(ids: string[]) {
  */
 export function useGetUserById(id: Opt<string>) {
   const { token } = useAuthProvider();
+  const { privateCall } = useApi();
 
   return useQuery({
     queryKey: ["users", id],
@@ -76,7 +82,7 @@ export function useGetUserById(id: Opt<string>) {
       if (!id) {
         throw new Error('User ID is required to retrieve a specific user');
       }
-      return await getUserById(token, id);
+      return await privateCall(() => getUserById(token, id));
     },
     enabled: !!id,
   });

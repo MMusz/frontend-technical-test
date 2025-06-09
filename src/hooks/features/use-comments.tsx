@@ -6,12 +6,14 @@ import { getNexPage } from "../../utils/pagination.utils";
 import { useAuthProvider, useProviders } from "./use-providers";
 import { useGetUsersFromCacheOrServer } from "./use-users";
 import { PaginatedMemes } from "../../types/meme.types";
+import { useApi } from "./use-api";
 
 /**
  * Hook allowing to get meme's comments page by page
  */
 export function useGetMemeComments(memeId: Nullable<string>) {
   const { token } = useAuthProvider();
+  const { privateCall } = useApi();
   const { fetchUsers } = useGetUsersFromCacheOrServer();
 
   return useInfiniteQuery<PaginatedComments>({
@@ -22,7 +24,9 @@ export function useGetMemeComments(memeId: Nullable<string>) {
         throw new Error('Meme ID is required to retrieve meme\'s comments');
       }
 
-      const response: GetCommentsApiResponse = await getMemeComments(token, memeId, pageParam as number);
+      const response: GetCommentsApiResponse = await privateCall(
+        () => getMemeComments(token, memeId, pageParam as number)
+      );
       if (!response.results.length) {
         return response as PaginatedComments;
       }
@@ -51,12 +55,13 @@ export function useGetMemeComments(memeId: Nullable<string>) {
  */
 export function usePostComment() {
   const { queryClient, token, id: authorId } = useProviders();
+  const { privateCall } = useApi();
   const { fetchUsers } = useGetUsersFromCacheOrServer();
 
   return useMutation({
     mutationFn: async (data: { memeId: string; content: string }) => {
       const { memeId, content } = data;
-      const comment: Comment = await createMemeComment(token, memeId, content);
+      const comment: Comment = await privateCall(() => createMemeComment(token, memeId, content));
 
       const authors = await fetchUsers([authorId]);
 
